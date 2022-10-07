@@ -1,0 +1,26 @@
+
+Vagrant.configure("2") do |config|
+  
+  config.vm.box = "generic/debian10"
+  config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 81, host: 8081, host_ip: "127.0.0.1"
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "512"
+  end
+ 
+  config.vm.provision "shell", inline: <<-SHELL
+    apt-get update
+    apt-get install -y apache2
+    apt-get install -y php
+
+    echo "Listen 81" >> /etc/apache2/ports.conf
+    echo "<VirtualHost *:81>
+      DocumentRoot /var/www/php
+    </VirtualHost>" >> /etc/apache2/sites-available/000-default.conf
+    mkdir /var/www/php
+    wget https://raw.githubusercontent.com/MaxChernoshey/itacademy-devops-files/master/02-tools/index.html -O /var/www/html/index.html
+    wget https://raw.githubusercontent.com/MaxChernoshey/itacademy-devops-files/master/02-tools/index.php -O /var/www/php/index.php
+    systemctl reload apache2
+  SHELL
+end
