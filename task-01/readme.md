@@ -1,1 +1,1 @@
-https://app.vagrantup.com/chernoshey/boxes/centos8
+https://app.vagrantup.com/chernoshey/boxes/centos8s
