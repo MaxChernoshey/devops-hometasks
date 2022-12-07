@@ -11,6 +11,9 @@ Vagrant.configure("2") do |config|
  
   config.vm.provision "shell", inline: <<-SHELL
     
+    systemctl stop firewalld
+    systemctl disable firewalld
+    
     echo "Listen 81" >> /etc/httpd/conf/httpd.conf
     echo "<VirtualHost *:81>
       DocumentRoot /var/www/php
