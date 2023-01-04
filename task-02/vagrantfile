@@ -6,7 +6,7 @@
 
   config.vm.provider "virtualbox" do |vb|
     vb.memory = "512"
-    vb.name   = "lxc.vagrant.vm"
+
   end
 
   config.vm.provision "shell", inline: <<-SHELL
@@ -26,11 +26,14 @@
     LXC_DHCP_MAX="253"
     LXC_DHCP_CONFILE=""
     LXC_DOMAIN=""' >> /etc/default/lxc-net
+   
     systemctl enable lxc-net
     systemctl restart lxc-net
+    
     echo 'lxc.net.0.type  = veth
     lxc.net.0.flags = up
     lxc.net.0.link  = lxcbr0' >> /etc/lxc/default.conf
+    
     lxc-create -n C1 -t download -f /etc/lxc/default.conf -- -d centos -r 8-Stream -a amd64 --no-validate
     
     lxc-start C1
@@ -40,14 +43,13 @@
     lxc-attach -n C1 -- systemctl disable firewalld
     lxc-attach -n C1 -- systemctl enable httpd.service
     lxc-attach -n C1 -- systemctl start httpd.service
-    echo "Listen 80" >> /var/lib/lxc/C1/rootfs/etc/httpd/conf/httpd.conf
-    echo "<VirtualHost *:80>
-      DocumentRoot /var/lib/lxc/C1/rootfs/var/www/php
-    </VirtualHost>" >> /var/lib/lxc/C1/rootfs/etc/httpd/conf.d/1.conf
+    
+    
     mkdir /var/lib/lxc/C1/rootfs/var/www/php
     wget https://raw.githubusercontent.com/MaxChernoshey/itacademy-devops-files/master/02-tools/index.html -O /var/lib/lxc/C1/rootfs/var/www/html/index.html
     
     lxc-attach -n C1 -- systemctl reload httpd.service
+    
     lxc-create -n C2 -t download -f /etc/lxc/default.conf -- -d centos -r 8-Stream -a amd64 --no-validate
     
     lxc-start C2
@@ -57,10 +59,8 @@
     lxc-attach -n C2 -- systemctl disable firewalld
     lxc-attach -n C2 -- systemctl enable httpd.service
     lxc-attach -n C2 -- systemctl start httpd.service
-    echo "Listen 81" >> /var/lib/lxc/C2/rootfs/etc/httpd/conf/httpd.conf
-    echo "<VirtualHost *:81>
-      DocumentRoot /var/lib/lxc/C2/rootfs/var/www/php
-    </VirtualHost>" >> /var/lib/lxc/C2/rootfs/etc/httpd/conf.d/1.conf
+    
+    
     mkdir /var/lib/lxc/C2/rootfs/var/www/php
         wget https://raw.githubusercontent.com/MaxChernoshey/itacademy-devops-files/master/02-tools/index.php -O /var/lib/lxc/C2/rootfs/var/www/php/index.php
     
@@ -71,7 +71,7 @@
   ipc1=$(lxc-ls -f | grep C1 | awk {'print $5'})
   iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 80 -j DNAT --to-destination $ipc1:80
   ipc2=$(lxc-ls -f | grep C2 | awk {'print $5'})
-  iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 81 -j DNAT --to-destination $ipc2:81
+  iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 81 -j DNAT --to-destination $ipc2:80
   SHELL
 
 end
