@@ -49,7 +49,7 @@
     wget https://raw.githubusercontent.com/MaxChernoshey/itacademy-devops-files/master/02-tools/index.html -O /var/lib/lxc/C1/rootfs/var/www/html/index.html
     
     lxc-attach -n C1 -- systemctl reload httpd.service
-    
+
     lxc-create -n C2 -t download -f /etc/lxc/default.conf -- -d centos -r 8-Stream -a amd64 --no-validate
     
     lxc-start C2
@@ -62,7 +62,7 @@
     
     
     mkdir /var/lib/lxc/C2/rootfs/var/www/php
-        wget https://raw.githubusercontent.com/MaxChernoshey/itacademy-devops-files/master/02-tools/index.php -O /var/lib/lxc/C2/rootfs/var/www/php/index.php
+        wget https://raw.githubusercontent.com/MaxChernoshey/itacademy-devops-files/master/02-tools/index.php -O /var/lib/lxc/C2/rootfs/var/www/html/index.html
     
         lxc-attach -n C2 -- systemctl reload httpd.service
   SHELL
