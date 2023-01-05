@@ -45,7 +45,6 @@
     lxc-attach -n C1 -- systemctl start httpd.service
     
     
-    mkdir /var/lib/lxc/C1/rootfs/var/www/php
     wget https://raw.githubusercontent.com/MaxChernoshey/itacademy-devops-files/master/02-tools/index.html -O /var/lib/lxc/C1/rootfs/var/www/html/index.html
     
     lxc-attach -n C1 -- systemctl reload httpd.service
@@ -61,7 +60,7 @@
     lxc-attach -n C2 -- systemctl start httpd.service
     
     
-      wget https://raw.githubusercontent.com/MaxChernoshey/itacademy-devops-files/master/02-tools/index.php -O /var/lib/lxc/C2/rootfs/var/www/html/index.php
+    wget https://raw.githubusercontent.com/MaxChernoshey/itacademy-devops-files/master/02-tools/index.php -O /var/lib/lxc/C2/rootfs/var/www/html/index.php
     
     lxc-attach -n C2 -- systemctl reload httpd.service
   SHELL
@@ -71,6 +70,6 @@
     iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 80 -j DNAT --to-destination $ipc1:80
     ipc2=$(lxc-ls -f | grep C2 | awk {'print $5'})
     iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 81 -j DNAT --to-destination $ipc2:80
-    SHELL
+  SHELL
 
 end
