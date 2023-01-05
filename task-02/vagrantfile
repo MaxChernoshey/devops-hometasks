@@ -61,17 +61,16 @@
     lxc-attach -n C2 -- systemctl start httpd.service
     
     
-    mkdir /var/lib/lxc/C2/rootfs/var/www/php
-        wget https://raw.githubusercontent.com/MaxChernoshey/itacademy-devops-files/master/02-tools/index.php -O /var/lib/lxc/C2/rootfs/var/www/html/index.html
+      wget https://raw.githubusercontent.com/MaxChernoshey/itacademy-devops-files/master/02-tools/index.php -O /var/lib/lxc/C2/rootfs/var/www/html/index.php
     
-        lxc-attach -n C2 -- systemctl reload httpd.service
+    lxc-attach -n C2 -- systemctl reload httpd.service
   SHELL
   
   config.vm.provision "shell", run: "always", inline: <<-SHELL
-  ipc1=$(lxc-ls -f | grep C1 | awk {'print $5'})
-  iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 80 -j DNAT --to-destination $ipc1:80
-  ipc2=$(lxc-ls -f | grep C2 | awk {'print $5'})
-  iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 81 -j DNAT --to-destination $ipc2:80
-  SHELL
+    ipc1=$(lxc-ls -f | grep C1 | awk {'print $5'})
+    iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 80 -j DNAT --to-destination $ipc1:80
+    ipc2=$(lxc-ls -f | grep C2 | awk {'print $5'})
+    iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 81 -j DNAT --to-destination $ipc2:80
+    SHELL
 
 end
