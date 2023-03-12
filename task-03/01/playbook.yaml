@@ -1,0 +1,79 @@
+---
+- name: Test play
+  hosts: all
+
+  tasks:
+    - name: Hello world
+      debug:
+        msg: "Hello, world!"
+
+    - name: Install Apache
+      sudo: true
+      apt:
+        name: apache2
+        state: present
+
+    - name: Install php
+      sudo: true
+      apt:
+        name: php
+        state: present
+
+    - name: Install Vim
+      become: yes
+      apt:
+        name: vim
+        state: present
+        update_cache: true
+
+    - name: Install mc
+      become: yes
+      apt:
+        name: mc
+        state: present
+        update_cache: true
+
+    - name: add line
+      sudo: true
+      lineinfile:
+        path: "/etc/apache2/ports.conf"
+        line: 'Listen 81'
+
+    - name: add block
+      sudo: true
+      blockinfile:
+        path: "/etc/apache2/sites-available/000-default.conf"
+        block: |
+              <VirtualHost *:81>
+              DocumentRoot /var/www/php
+              </VirtualHost>
+
+    - name: add line
+      sudo: true
+      lineinfile:
+        path: "/etc/apache2/ports.conf"
+        line: 'Listen 81'
+
+    - name: Creates directory
+      sudo: true
+      file:
+        path: /var/www/php
+        state: directory        
+
+    - name: CURL simple download file1
+      sudo: true
+      uri:
+        url: https://raw.githubusercontent.com/MaxChernoshey/itacademy-devops-files/master/02-tools/index.html
+        dest: /var/www/html
+
+    - name: CURL simple download file2
+      sudo: true
+      uri:
+        url: https://raw.githubusercontent.com/MaxChernoshey/itacademy-devops-files/master/02-tools/index.php
+        dest: /var/www/php
+
+    - name: Restart service httpd, in all cases
+      sudo: true
+      service:
+        name: apache2
+        state: reloaded
