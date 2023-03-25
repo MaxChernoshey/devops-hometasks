@@ -1,0 +1,77 @@
+---
+- name: nginx
+  hosts: all
+
+  tasks:
+    - name: ensure nginx is at the latest version
+      sudo: true
+      apt: name=nginx state=latest
+
+    - name: start nginx
+      become: yes
+      service:
+        name: nginx
+        state: started
+
+    - name: Install php
+      sudo: true
+      apt:
+        name: php
+        state: present
+
+    - name: Install Vim
+      become: yes
+      apt:
+        name: vim
+        state: present
+        update_cache: true
+
+    - name: Install mc
+      become: yes
+      apt:
+        name: mc
+        state: present
+        update_cache: true
+
+        
+    - name: Creating an empty file1
+      become: yes
+      file:
+        path: "/etc/nginx/conf.d/site1.conf"
+        state: touch   
+
+    - name: add block
+      sudo: true
+      blockinfile:
+        path: "/etc/nginx/conf.d/site1.conf"
+        block: |
+              server {
+              listen 81;
+                location / {
+                proxy_pass http://192.168.20.4/;
+                  }
+                }
+    - name: Creating an empty file2
+      become: yes
+      file:
+        path: "/etc/nginx/conf.d/site2.conf"
+        state: touch   
+
+    - name: add block
+      sudo: true
+      blockinfile:
+        path: "/etc/nginx/conf.d/site2.conf"
+        block: |
+              server {
+              listen 82;
+                location / {
+                proxy_pass http://192.168.20.5/;
+                  }
+                }
+
+    - name: restart nginx
+      become: yes
+      service:
+        name: nginx
+        state: restarted
+        

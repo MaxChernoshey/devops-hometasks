@@ -1,0 +1,38 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "generic/debian10"
+  config.vm.synced_folder  ".", "/vagrant", disabled: false
+  
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "512"
+  end
+ 
+  config.vm.define "nginx" do |nginx|
+    nginx.vm.network "private_network", ip: "192.168.20.6"
+
+    nginx.vm.provision "ansible_local" do |ansible|
+      ansible.playbook = "nginx.yaml"
+      ansible.become = true
+    end
+  end
+
+  config.vm.define "slave" do |slave|
+    slave.vm.network "private_network", ip: "192.168.20.4"
+
+    slave.vm.provision "ansible_local" do |ansible|
+      ansible.playbook = "slave.yaml"
+      ansible.become = true
+    end
+  end
+
+  config.vm.define "master" do |master|
+    master.vm.network "private_network", ip: "192.168.20.5"
+
+    master.vm.provision "ansible_local" do |ansible|
+      ansible.playbook = "master.yaml"
+      ansible.become = true
+    end
+  end
+end

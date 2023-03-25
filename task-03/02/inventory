@@ -1,0 +1,8 @@
+slave	ansible_host=192.168.20.4 
+master	ansible_host=192.168.20.5
+nginx   ansible_host=192.168.20.6
+
+[all:vars]
+ansible_connection=ssh
+ansible_user=vagrant
+ansible_password=vagrant

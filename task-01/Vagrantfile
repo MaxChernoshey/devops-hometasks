@@ -24,3 +24,4 @@ Vagrant.configure("2") do |config|
     systemctl reload apache2
   SHELL
 end
+  
