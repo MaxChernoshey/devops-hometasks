@@ -1,0 +1,15 @@
+master.puppet	
+#slave1.puppet	ansible_host=192.168.50.10
+#slave2.puppet   ansible_host=192.168.50.15
+
+[master]
+192.168.50.5
+
+[slave_puppet]
+192.168.50.10
+192.168.50.15
+
+[all:vars]
+ansible_connection=ssh
+ansible_user=vagrant
+ansible_password=vagrant
