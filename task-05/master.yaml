@@ -1,0 +1,125 @@
+---
+- name: master
+  hosts: master.puppet
+
+  tasks:
+  - rpm_key:
+      state: present
+      key: https://yum.puppet.com/RPM-GPG-KEY-puppet-20250406
+
+  - name: Stop firewall
+    systemd:
+      name: firewalld
+      state: stopped
+      enabled: false
+  
+  - name: install the puppet from a remote repo
+    yum:
+      name: https://yum.puppet.com/puppet7-release-el-8.noarch.rpm
+      state: present
+
+  - name: Install puppet
+    yum:
+      name: "{{ item }}"
+    with_items:
+      - puppetserver
+      - git
+     
+  - name: replacing a line in file
+    lineinfile: 
+      path: /etc/sysconfig/puppetserver 
+      regexp: '^JAVA_ARGS="-Xms2g -Xmx2g -Djruby.logger.class=com.puppetlabs.jruby_utils.jruby.Slf4jLogger"' 
+      line: 'JAVA_ARGS="-Xms256m -Xmx256m -Djruby.logger.class=com.puppetlabs.jruby_utils.jruby.Slf4jLogger"'
+      backrefs: yes 
+
+  - name: Start puppetserver
+    systemd:
+      name: puppetserver
+      state: started
+
+  - name: Enable puppetserver
+    systemd:
+      name: puppetserver
+      enabled: yes
+
+  
+  - name: add a block in file1
+    blockinfile: 
+      path: /etc/puppetlabs/puppet/puppet.conf 
+      block: | 
+        [agent]
+        server = master.puppet
+
+  - name: add a block in file2
+    blockinfile: 
+      create: yes
+      path: /etc/puppetlabs/puppet/autosign.conf 
+      block: | 
+        slave1.puppet
+        slave2.puppet
+
+  - name: Install r10k
+    gem:
+      name: r10k
+      executable: /opt/puppetlabs/puppet/bin/gem
+      user_install: false
+      state: present      
+
+  - name: add a block in file3
+    blockinfile: 
+      create: yes
+      path: /etc/puppetlabs/r10k/r10k.yaml 
+      block: | 
+        :cachedir: '/var/cache/r10k'
+        :sources:
+          :my-org:
+             :remote: 'https://github.com/MaxChernoshey/master-puppet.git'
+             :basedir: '/etc/puppetlabs/code/environments'      
+
+  - name: /opt/puppetlabs/puppet/bin/r10k deploy environment -p
+    shell: /opt/puppetlabs/puppet/bin/r10k deploy environment -p
+
+# /opt/puppetlabs/puppet/bin/puppet agent -t
+- name: slave
+  hosts: slave1.puppet slave2.puppet mineserver.puppet
+
+  tasks:
+  - rpm_key:
+      state: present
+      key:  https://yum.puppet.com/RPM-GPG-KEY-puppet-20250406
+
+  - name: install the puppet from a remote repo
+    yum:
+      name: https://yum.puppet.com/puppet7-release-el-8.noarch.rpm
+      state: present
+
+  - name: Install puppet
+    yum:
+      name: "{{ item }}"
+    with_items:
+      - puppet-agent
+    
+
+  - name: Start puppet
+    systemd:
+      name: puppet
+      state: started
+
+  - name: Enable puppet
+    systemd:
+      name: puppet
+      enabled: yes
+
+  - name: add a block in file
+    blockinfile: 
+      path: /etc/puppetlabs/puppet/puppet.conf 
+      block: | 
+        [agent]
+        server = master.puppet
+        runinterval = 1m
+
+  - name: add a line in file
+    lineinfile: 
+      path: /etc/hosts 
+      line: '192.168.50.5 master.puppet'
+      
