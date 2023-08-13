@@ -57,6 +57,7 @@
       block: | 
         slave1.puppet
         slave2.puppet
+        mineserver.puppet
 
   - name: Install r10k
     gem:
@@ -73,7 +74,7 @@
         :cachedir: '/var/cache/r10k'
         :sources:
           :my-org:
-             :remote: 'https://github.com/MaxChernoshey/master-puppet.git'
+             :remote: 'https://github.com/MaxChernoshey/master-puppet1.git'
              :basedir: '/etc/puppetlabs/code/environments'      
 
   - name: /opt/puppetlabs/puppet/bin/r10k deploy environment -p
