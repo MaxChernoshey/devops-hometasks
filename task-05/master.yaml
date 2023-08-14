@@ -79,6 +79,9 @@
 
   - name: /opt/puppetlabs/puppet/bin/r10k deploy environment -p
     shell: /opt/puppetlabs/puppet/bin/r10k deploy environment -p
+  
+  - name: /opt/puppetlabs/puppet/bin/puppet agent -t
+    shell: /opt/puppetlabs/puppet/bin/puppet agent -t
 
 # /opt/puppetlabs/puppet/bin/puppet agent -t
 - name: slave
