@@ -41,16 +41,8 @@
     systemd:
       name: puppetserver
       enabled: yes
-
   
   - name: add a block in file1
-    blockinfile: 
-      path: /etc/puppetlabs/puppet/puppet.conf 
-      block: | 
-        [agent]
-        server = master.puppet
-
-  - name: add a block in file2
     blockinfile: 
       create: yes
       path: /etc/puppetlabs/puppet/autosign.conf 
@@ -66,7 +58,7 @@
       user_install: false
       state: present      
 
-  - name: add a block in file3
+  - name: add a block in file2
     blockinfile: 
       create: yes
       path: /etc/puppetlabs/r10k/r10k.yaml 
@@ -80,8 +72,26 @@
   - name: /opt/puppetlabs/puppet/bin/r10k deploy environment -p
     shell: /opt/puppetlabs/puppet/bin/r10k deploy environment -p
   
-  - name: /opt/puppetlabs/puppet/bin/puppet agent -t
-    shell: /opt/puppetlabs/puppet/bin/puppet agent -t
+  - name: add a block in file3
+    blockinfile: 
+      path: /etc/puppetlabs/puppet/puppet.conf 
+      block: | 
+        [agent]
+        server = master.puppet
+        runinterval = 1m
+        
+  - name: Start puppet
+    systemd:
+      name: puppet
+      state: started
+
+  - name: Enable puppet
+    systemd:
+      name: puppet
+      enabled: yes
+
+  #- name: sudo /opt/puppetlabs/puppet/bin/puppet agent -t
+  #  shell: sudo /opt/puppetlabs/puppet/bin/puppet agent -t
 
 # /opt/puppetlabs/puppet/bin/puppet agent -t
 - name: slave
@@ -126,4 +136,4 @@
     lineinfile: 
       path: /etc/hosts 
       line: '192.168.50.5 master.puppet'
-      
+
