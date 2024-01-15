@@ -1,0 +1,10 @@
+---
+- name: master
+  hosts: jenkins.vm
+
+  roles:
+     - role: jenkins
+       become: yes
+
+       
+

@@ -1,0 +1,20 @@
+jenkins_user: admin  
+jenkins_password: admin
+jenkins_plagins: >
+  credentials 
+  credentials-binding
+  locale
+  git 
+  timestamper
+  pipeline-groovy-lib 
+  workflow-basic-steps
+  workflow-cps
+  workflow-multibranch
+  pipeline-build-stepexit
+  pipeline-input-step
+  pipeline-milestone-step
+  pipeline-stage-step
+  pipeline-model-definition
+  configuration-as-code
+  golang
+

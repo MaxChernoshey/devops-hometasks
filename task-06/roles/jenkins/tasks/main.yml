@@ -1,0 +1,92 @@
+- name: Install package
+  ansible.builtin.apt:
+    name: 
+      - build-essential
+      - default-jre
+    update_cache: yes
+
+- name: Add Jenkins GPG key
+  shell: curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo gpg --dearmor -o /usr/share/keyrings/jenkins-keyring.gpg
+  args:
+    creates: /usr/share/keyrings/jenkins-keyring.gpg
+
+- name: Add Jenkins repository
+  apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/jenkins-keyring.gpg] https://pkg.jenkins.io/debian-stable binary/"
+    state: present
+    
+- name: Install Jenkins
+  ansible.builtin.apt:
+    name: 
+      - jenkins
+    update_cache: yes
+
+- name: Creates directory
+  ansible.builtin.file:
+    path: /var/lib/jenkins/init.groovy.d
+    state: directory
+    owner: jenkins
+    group: jenkins
+
+
+- name: Template a file to /etc/file.conf
+  ansible.builtin.template:
+    dest: /var/lib/jenkins/init.groovy.d
+    src: "{{ item }}"
+  with_items:
+    - 01-admin-user.groovy
+    - 02_plugins.groovy
+    
+
+- name: Replace TimeoutStartSec
+  ansible.builtin.replace:
+    path: /lib/systemd/system/jenkins.service
+    regexp: '^#TimeoutStartSec=90'
+    replace: 'TimeoutStartSec=180'
+
+- name: Replace TimeoutStartSec
+  ansible.builtin.replace:
+    path: /lib/systemd/system/jenkins.service
+    regexp: '^Environment="JAVA_OPTS=-Djava.awt.headless=true"'  
+    replace: 'Environment="JAVA_OPTS=-Djava.awt.headless=true -Djenkins.install.runSetupWizard=false"'
+
+
+- name: Creates file
+  become: yes
+  file:
+    path: /var/lib/jenkins/jenkins.yaml
+    state: touch   
+    owner: jenkins
+    group: jenkins
+
+- name: add block
+  become: yes
+  blockinfile:
+    path: /var/lib/jenkins/jenkins.yaml
+    block: |
+      credentials:
+        system:
+          domainCredentials:
+          - credentials:
+            - usernamePassword:
+                scope:    SYSTEM
+                id:       slave_creds
+                username: vagrant
+                password: vagrant
+
+      tool:
+        go:
+          installations:
+          - name: "go_lang"
+            properties:
+            - installSource:
+                installers:
+                - golangInstaller:
+                    id: "1.16"
+
+- name: reloaded service 
+  systemd:
+    name: jenkins
+    daemon_reload: yes
+    state: restarted
+  become: yes
